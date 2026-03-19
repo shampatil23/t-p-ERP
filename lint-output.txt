@@ -1,0 +1,36 @@
+﻿
+> app-src@0.1.0 lint
+> eslint
+
+
+C:\Users\bavis\Desktop\ERP\app-src\src\app\dashboard\drives\page.js
+  643:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\bavis\Desktop\ERP\app-src\src\app\dashboard\layout.js
+  53:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  51 |
+  52 |     useEffect(() => {
+> 53 |         setCurrentPath(window.location.pathname);
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  54 |     }, []);
+  55 |
+  56 |     // Listen for route changes  react-hooks/set-state-in-effect
+
+C:\Users\bavis\Desktop\ERP\app-src\src\app\dashboard\sessions\page.js
+  681:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\bavis\Desktop\ERP\app-src\src\app\dashboard\settings\page.js
+  66:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\bavis\Desktop\ERP\app-src\src\components\Sidebar.js
+  115:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+Γ£û 5 problems (1 error, 4 warnings)
+
