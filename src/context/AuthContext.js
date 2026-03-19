@@ -36,13 +36,17 @@ export const AuthProvider = ({ children }) => {
     const [userRole, setUserRole] = useState("faculty");
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             // Set user immediately — don't block on DB call
             setUser(firebaseUser || null);
             setLoading(false);
 
             // Fetch role in the background (non-blocking)
-            if (firebaseUser) {
+            if (firebaseUser && db) {
                 fetchUserRole(firebaseUser.uid).then(setUserRole);
             } else {
                 setUserRole("faculty");
@@ -52,22 +56,25 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const signInWithGoogle = async () => {
+        if (!auth || !googleProvider) throw new Error("Firebase not initialized");
         try {
             const result = await signInWithPopup(auth, googleProvider);
             setUser(result.user);
             // Save user to DB in background
-            get(child(ref(db), "users/" + result.user.uid)).then((snap) => {
-                if (!snap.exists()) {
-                    set(ref(db, "users/" + result.user.uid), {
-                        name: result.user.displayName,
-                        email: result.user.email,
-                        photoURL: result.user.photoURL,
-                        role: "faculty",
-                        department: "",
-                        createdAt: new Date().toISOString(),
-                    }).catch(() => { });
-                }
-            }).catch(() => { });
+            if (db) {
+                get(child(ref(db), "users/" + result.user.uid)).then((snap) => {
+                    if (!snap.exists()) {
+                        set(ref(db, "users/" + result.user.uid), {
+                            name: result.user.displayName,
+                            email: result.user.email,
+                            photoURL: result.user.photoURL,
+                            role: "faculty",
+                            department: "",
+                            createdAt: new Date().toISOString(),
+                        }).catch(() => { });
+                    }
+                }).catch(() => { });
+            }
             return result.user;
         } catch (error) {
             console.error("Google Sign-In Error:", error);
@@ -76,18 +83,21 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signUpWithEmail = async (email, password, name) => {
+        if (!auth) throw new Error("Firebase not initialized");
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
             setUser(result.user);
             // Save user to DB in background
-            set(ref(db, "users/" + result.user.uid), {
-                name: name || email.split("@")[0],
-                email: result.user.email,
-                photoURL: null,
-                role: "faculty",
-                department: "",
-                createdAt: new Date().toISOString(),
-            }).catch(() => { });
+            if (db) {
+                set(ref(db, "users/" + result.user.uid), {
+                    name: name || email.split("@")[0],
+                    email: result.user.email,
+                    photoURL: null,
+                    role: "faculty",
+                    department: "",
+                    createdAt: new Date().toISOString(),
+                }).catch(() => { });
+            }
             return result.user;
         } catch (error) {
             console.error("Email Sign-Up Error:", error);
@@ -96,6 +106,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const loginWithEmail = async (email, password) => {
+        if (!auth) throw new Error("Firebase not initialized");
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
             setUser(result.user);
@@ -107,6 +118,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signOut = async () => {
+        if (!auth) {
+            setUser(null);
+            setUserRole("faculty");
+            return;
+        }
         try {
             await firebaseSignOut(auth);
             setUser(null);
@@ -116,6 +132,7 @@ export const AuthProvider = ({ children }) => {
             throw error;
         }
     };
+
 
     return (
         <AuthContext.Provider
